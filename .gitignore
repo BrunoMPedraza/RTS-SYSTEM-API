@@ -68,3 +68,6 @@ Thumbs.db.meta
 [Ll]ogs/
 logs/
 **/[Ll]ogs
+Logs/AssetImportWorker0.log
+*.log
+Logs/

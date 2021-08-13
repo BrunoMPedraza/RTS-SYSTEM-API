@@ -3366,7 +3366,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 620955228}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -39.11983, y: 2.707, z: 67.2959}
+  m_LocalPosition: {x: -38.6, y: 2.707, z: 89.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1303235760}
@@ -9494,16 +9494,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4dff27fed81ba548a1c9bb1f88ee8c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
-  lockCameraInPlace: 1
   keyboardControl: 0
-  panSpeed: 10
+  cameraSpeed: 5
+  panSpeed: 5
   panBorderThickness: 10
+  panPosition: {x: 0, y: 0, z: 0}
   panLimit: {x: 80, y: 80}
   scrollSpeed: 4
-  minY: 10
+  minY: 0
   maxY: 75
-  offsetFromTarget: {x: -39.11983, y: 19.6, z: 60}
+  lockTarget: {fileID: 620955233}
+  offSet: {x: 0, y: 19.6, z: -12}
+  isLocked: 0
 --- !u!124 &2018271275
 Behaviour:
   m_ObjectHideFlags: 0
