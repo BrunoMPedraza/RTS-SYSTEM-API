@@ -3202,6 +3202,7 @@ GameObject:
   - component: {fileID: 620955230}
   - component: {fileID: 620955229}
   - component: {fileID: 620955234}
+  - component: {fileID: 620955235}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -3303,6 +3304,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a59f57afb0e2c554fae4ae12491a7055, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputManager: {fileID: 0}
+  playerName: Unit
   health: 100
   teamIndex: 0
   holdingGold: 0
@@ -3312,6 +3315,18 @@ MonoBehaviour:
     emissor: {fileID: 0}
     receiver: {fileID: 0}
     receiverPosition: {x: 0, y: 0, z: 0}
+--- !u!114 &620955235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 620955228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd7e6841eaee8d943abc4c65309853d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &632595240
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9222,7 +9237,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4dff27fed81ba548a1c9bb1f88ee8c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 620955233}
+  player: {fileID: 620955234}
   keyboardControl: 0
   panSpeed: 30
   panBorderThickness: 10

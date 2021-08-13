@@ -1,9 +1,10 @@
+using System;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public Transform player;
-    public bool keyboardControl = false;
+    public PlayerMotor player;
+    public bool keyboardControl;
     public float panSpeed = 20f;
     public float panBorderThickness = 10f;
     public Vector2 panLimit;
@@ -12,12 +13,16 @@ public class CameraController : MonoBehaviour
     public float maxY = 75f;
     public Vector3 offsetFromTarget;
 
+    private void Awake()
+    {
+        keyboardControl = PlayerInputManager.currentKeyHandler.keyboardControlsCamera;
+    }
+
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Space) && player)
-            transform.position = player.position + offsetFromTarget;
-        // TODO: CHECK!!
 
+        if(Input.GetKeyDown(PlayerInputManager.GetKeyCode("camera_lockOnce_key")) && player)
+            transform.position = player.transform.position + offsetFromTarget;
         var pos = transform.position;
         pos.z += 
         (Input.mousePosition.y >= Screen.height - 

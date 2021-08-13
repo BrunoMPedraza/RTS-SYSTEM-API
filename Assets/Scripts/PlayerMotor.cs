@@ -1,14 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-[RequireComponent(typeof(NavMeshAgent))]
 
-// Manages orders based upon the behavior of the character. Its independent of the INPUT.
-// Therefore an AI might use it
 
+// Player motor is based on the premise of orders which catch up between each other if they are completed, or end abruptly if interrumpted.
+// They will also cycle to try and complete themselves in cases of "out of range"
+
+// The order system works this way 
+// #1 
+[RequireComponent(typeof(NavMeshAgent), typeof(PlayerInputManager))]
 public class PlayerMotor : MonoBehaviour
 {
-    #region Initialization
+    [HideInInspector] public PlayerInputManager inputManager;
+    public string playerName = "Unit";
     NavMeshAgent agent;
     public float health = 100;
     public bool isDead => health < 0;
@@ -16,15 +20,16 @@ public class PlayerMotor : MonoBehaviour
     public int holdingGold = 0;
     public LinkedList<Order> orders = new LinkedList<Order>();
     public Order currentOrder = null;
-    void Start()
+    void Awake()
     {
+        inputManager = GetComponent<PlayerInputManager>();
         agent = GetComponent<NavMeshAgent>();
     }
     #endregion
     #region Update
     void Update()
     {
-        if(isDead || Input.GetKeyDown(KeyCode.S))
+        if(isDead || Input.GetKeyDown(PlayerInputManager.GetKeyCode("order_Stop")))
         {
             StopOrders();
         }
