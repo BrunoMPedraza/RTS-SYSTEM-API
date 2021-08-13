@@ -1,18 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 
 [System.Serializable]
 public class Order
 {
+    #region PublicVariables
     public string orderName = "Order";
-    public enum OrderType { ATTACK, FOLLOW, HARVEST, BUILD, MOVE }
+    public enum OrderType { ATTACK, FOLLOW, HARVEST, BUILD, MOVE } 
     public OrderType orderType = OrderType.FOLLOW;
     public GameObject emissor;
     public GameObject receiver;
     public Vector3 receiverPosition;
     public Order linkedOrder;
+    #endregion
     public bool isCompleted() {
         switch (orderType)
         {

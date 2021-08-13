@@ -16,6 +16,7 @@ public class CameraController : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Space) && player)
             transform.position = player.position + offsetFromTarget;
+        // TODO: CHECK!!
 
         var pos = transform.position;
         pos.z += 
