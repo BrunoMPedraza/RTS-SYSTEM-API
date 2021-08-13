@@ -34,6 +34,7 @@ public class CameraController : MonoBehaviour
             isLocked = !isLocked;
         }
         if(isLocked){
+            offSet.z = offSet.y/2; // RELATIVE OFFSET BASED UPON ZOOM ON CAMERA
             panPosition = lockTarget.position;
             LookAtPosition(lockTarget.position);
         }
@@ -51,7 +52,7 @@ public class CameraController : MonoBehaviour
         panBorderThickness ? -1 : 0 + (keyboardControl ? Input.GetAxisRaw("Horizontal") : 0) * panSpeed * Time.deltaTime);
 
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-        panPosition.y -= scroll * scrollSpeed * 1000f * Time.deltaTime;
+        offSet.y -= scroll * scrollSpeed * 1000f * Time.deltaTime;
 
         panPosition.x = Mathf.Clamp(panPosition.x, -panLimit.x, panLimit.x);
         panPosition.y = Mathf.Clamp(panPosition.y, minY, maxY);
