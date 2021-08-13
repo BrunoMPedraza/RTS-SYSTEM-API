@@ -17,6 +17,7 @@ public class CameraController : MonoBehaviour
     public Transform lockTarget;
     public Vector3 offSet;
     public bool isLocked = true;
+    public bool rememberZoom = true;
     #endregion
 
 
@@ -52,7 +53,10 @@ public class CameraController : MonoBehaviour
         panBorderThickness ? -1 : 0 + (keyboardControl ? Input.GetAxisRaw("Horizontal") : 0) * panSpeed * Time.deltaTime);
 
         float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if(rememberZoom) //IF YES THEN IT WILL REMEMBER THE ACTUAL ZOOM, DOESNT WORK IN EXECUTION
         offSet.y -= scroll * scrollSpeed * 1000f * Time.deltaTime;
+        else
+        panPosition.y -= scroll * scrollSpeed * 1000f * Time.deltaTime;
 
         panPosition.x = Mathf.Clamp(panPosition.x, -panLimit.x, panLimit.x);
         panPosition.y = Mathf.Clamp(panPosition.y, minY, maxY);
