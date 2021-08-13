@@ -1,46 +1,52 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerMotor))]
 public class PlayerMovement : MonoBehaviour
 {
+    #region Initialization 
     Camera cam;
-    public LayerMask movementMask;
     PlayerMotor motor;
     Vector3 mouseTarget;
-
+    
     void Start()
     {
         cam = Camera.main;
         motor = GetComponent<PlayerMotor>();
     }
-
-    // Update is called once per frame
+    #endregion
     void Update()
     {
         if(Input.GetMouseButtonDown(1)){
-            motor.AddOrder(motor.FilterOrderBy(GetPositionOnMouse(), GetTransformOnMouse()));
+            motor.AddOrder(motor.FilterOrderBy(PositionOnMouse, TransformOnMouse));
             Debug.Log("Added order to " + gameObject.name);
         }
     }
 
-
-    Vector3 GetPositionOnMouse(){
-        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        if(Physics.Raycast(ray,out hit)){
-            return hit.point;
+    public Vector3 PositionOnMouse
+    {
+        get
+        {
+            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit))
+            {
+                return hit.point;
+            }
+            return Vector3.zero;
         }
-        return Vector3.zero;
     }
 
-    Transform GetTransformOnMouse(){
-        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit)) { 
-            return hit.transform;
+    public Transform TransformOnMouse
+    {
+        get
+        {
+            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit))
+            {
+                return hit.transform;
+            }
+            return null;
         }
-        return null;
     }
 }

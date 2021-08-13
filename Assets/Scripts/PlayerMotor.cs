@@ -1,7 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+
 
 // Player motor is based on the premise of orders which catch up between each other if they are completed, or end abruptly if interrumpted.
 // They will also cycle to try and complete themselves in cases of "out of range"
@@ -25,8 +25,8 @@ public class PlayerMotor : MonoBehaviour
         inputManager = GetComponent<PlayerInputManager>();
         agent = GetComponent<NavMeshAgent>();
     }
-
-    // Update is called once per frame
+    #endregion
+    #region Update
     void Update()
     {
         if(isDead || Input.GetKeyDown(PlayerInputManager.GetKeyCode("order_Stop")))
@@ -49,11 +49,9 @@ public class PlayerMotor : MonoBehaviour
             StartOrder(orders.First.Value);
         }
     }
+    #endregion
+    public void MoveToPoint(Vector3 point) => agent.SetDestination(point);
 
-    public void MoveToPoint(Vector3 point){
-        agent.SetDestination(point);
-    }
-    
     public void AddOrder(Order order)
     {
         orders.AddLast(order);
@@ -71,16 +69,27 @@ public class PlayerMotor : MonoBehaviour
     {
         if(target.GetComponent<PlayerMotor>())
             if(target.GetComponent<PlayerMotor>().teamIndex != teamIndex)
-                return new Order("Attack " + target.name, Order.OrderType.ATTACK, gameObject, target.position, target.gameObject);
+                return new Order("Attack " + target.name,
+                                 Order.OrderType.ATTACK,
+                                 gameObject,
+                                 target.position,
+                                 target.gameObject);
+                                 
         if(target.GetComponent<Item>())
-            return new Order("Harvest " + target.name, Order.OrderType.HARVEST, gameObject, target.position, target.gameObject);
+            return new Order("Harvest " + target.name,
+                             Order.OrderType.HARVEST,
+                             gameObject,
+                             target.position,
+                             target.gameObject);
 
-        return new Order("Move towards " + position, Order.OrderType.MOVE, gameObject, position);
+        return new Order("Move towards " + position,
+                         Order.OrderType.MOVE,
+                         gameObject,
+                         position);
     }
     
     public void StartOrder(Order order){
         Debug.Log("Order " + order.orderName);
-        // orders.RemoveFirst();
         switch (order.orderType)
         {
             case Order.OrderType.MOVE:

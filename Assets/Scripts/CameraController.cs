@@ -20,9 +20,9 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
+
         if(Input.GetKeyDown(PlayerInputManager.GetKeyCode("camera_lockOnce_key")) && player)
             transform.position = player.transform.position + offsetFromTarget;
-
         var pos = transform.position;
         pos.z += 
         (Input.mousePosition.y >= Screen.height - 
