@@ -11,6 +11,7 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent), typeof(PlayerInputManager))]
 public class PlayerMotor : MonoBehaviour
 {
+    #region Initialization
     [HideInInspector] public PlayerInputManager inputManager;
     public string playerName = "Unit";
     NavMeshAgent agent;
