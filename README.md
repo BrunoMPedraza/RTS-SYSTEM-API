@@ -16,7 +16,7 @@ Any relevant changes can be made in the inspector since the variables are public
 #### Future features
 * Player input manager (*Take input information*)
 * Center camera on input (F1 by default)
-* ~~Lock camera on input (Y by default) ~~
+* ~~Lock camera on input (Y by default) 
 * Check last relevant event on input (Space by default)
 * Roll warcraft 3 style on zoom
 * ~~Smooth zoom~~
