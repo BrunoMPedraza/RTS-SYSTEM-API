@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a00c9b3af42e75941ba8ccaf6d20222d, type: 3}
+  m_Name: DefaultKeyConfig
+  m_EditorClassIdentifier: 
+  findingDuplicatesBehaviour: 0
+  keyHandlerName: Default
+  inputKeys:
+  - keyName: camera_lockOnce_key
+    keyCode: 282
+  - keyName: camera_lockHold_key
+    keyCode: 121
+  - keyName: order_Stop
+    keyCode: 115
+  - keyName: order_Attack
+    keyCode: 97
+  keyboardControlsCamera: 0
