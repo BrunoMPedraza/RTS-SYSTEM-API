@@ -3,22 +3,23 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerMotor))]
 public class PlayerMovement : MonoBehaviour
 {
-    #region Initialization 
-    Camera cam;
-    PlayerMotor motor;
-    Vector3 mouseTarget;
+    #region Initialization
+
+    private Camera _cam;
+    private PlayerMotor _motor;
     
-    void Start()
+    void Awake()
     {
-        cam = Camera.main;
-        motor = GetComponent<PlayerMotor>();
+        if (!_cam) _cam = FindObjectOfType<Camera>();
+        _motor = GetComponent<PlayerMotor>();
     }
+    
     #endregion
     void Update()
     {
-        if(Input.GetMouseButtonDown(1)){
-            motor.AddOrder(motor.FilterOrderBy(PositionOnMouse, TransformOnMouse));
-            Debug.Log("Added order to " + gameObject.name);
+        if(Input.GetMouseButtonDown(1))
+        {
+            _motor.AddOrder(_motor.FilterOrderBy(PositionOnMouse, TransformOnMouse));
         }
     }
 
@@ -26,7 +27,7 @@ public class PlayerMovement : MonoBehaviour
     {
         get
         {
-            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+            Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
@@ -40,7 +41,7 @@ public class PlayerMovement : MonoBehaviour
     {
         get
         {
-            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+            Ray ray = _cam.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {

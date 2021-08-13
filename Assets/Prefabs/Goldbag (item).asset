@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7c9e40a41ba3604a9f9a0f06629fdd7, type: 3}
-  m_Name: Inter_BolsaDeOro
+  m_Script: {fileID: 11500000, guid: 1d1ef23fafcffd3479a38c611edb4bbe, type: 3}
+  m_Name: Goldbag (item)
   m_EditorClassIdentifier: 
-  selectionRadius: 4
-  unselectable: 0
-  type: 0
+  interactionType: {fileID: 11400000, guid: fbe08a57588a3b34084066f77cd9e81d, type: 2}
+  type: 1
+  price: 50

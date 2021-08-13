@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,61 +9,101 @@ using UnityEngine.AI;
 
 // The order system works this way 
 // #1 
-[RequireComponent(typeof(NavMeshAgent), typeof(PlayerInputManager))]
+[RequireComponent(typeof(NavMeshAgent), typeof(PlayerInputManager), typeof(Interactable))]
 public class PlayerMotor : MonoBehaviour
 {
     #region Initialization
     [HideInInspector] public PlayerInputManager inputManager;
-    public string playerName = "Unit";
-    NavMeshAgent agent;
-    public float health = 100;
-    public bool isDead => health < 0;
-    public int teamIndex = 0;
+    [HideInInspector] public Interactable interactableSettings;
+    [Header("Dynamic Properties")]
     public int holdingGold = 0;
-    public LinkedList<Order> orders = new LinkedList<Order>();
-    public Order currentOrder = null;
+    public float health = 100;
+    
+    [Header("Static Properties")] 
+    private NavMeshAgent _agent;
+    public string playerName = "Unit";
+    public int teamIndex = 0;
+
+    public List<Order> Orders;
+    public LinkedList<Order> _orders = new LinkedList<Order>();
+    public Order currentOrder;
+    private Interactable followingTarget;
     void Awake()
     {
         inputManager = GetComponent<PlayerInputManager>();
-        agent = GetComponent<NavMeshAgent>();
+        interactableSettings = GetComponent<Interactable>();
+        _agent = GetComponent<NavMeshAgent>();
+        currentOrder.isEmptyOrDone = true;
     }
     #endregion
-    #region Update
-    void Update()
+    
+    private void Update()
     {
-        if(isDead || Input.GetKeyDown(PlayerInputManager.GetKeyCode("order_Stop")))
+        Orders = _orders.ToList();
+        if(IsDead || Input.GetKeyDown(PlayerInputManager.GetKeyCode("order_Stop")))
         {
-            StopOrders();
+            if(!currentOrder.isEmptyOrDone) StopOrders();
+            return;
         }
-
-        if(currentOrder != null)
+        
+        if(!currentOrder.isEmptyOrDone)
         {
             if(currentOrder.isCompleted())
             {
                 Debug.Log("Current order completed: " + currentOrder.orderName);
-                if(currentOrder.linkedOrder != null)
-                    StartOrder(currentOrder.linkedOrder);
-                else
-                    currentOrder = null;
+                if (currentOrder.linkedOrder != null)
+                {
+                    Debug.Log(currentOrder.orderName + " finished. Starting order " + currentOrder.linkedOrder.orderName);
+                    currentOrder = currentOrder.linkedOrder;
+                    StartOrder(currentOrder);
+                }
+
+                currentOrder.isEmptyOrDone = true;
+                followingTarget = null;
+                _orders.RemoveFirst();
+            }
+
+            if (followingTarget)
+            {
+                MoveAndLockOnto(followingTarget);
             }
         }
-        else if(orders.Count > 0){
-            StartOrder(orders.First.Value);
-        }
     }
-    #endregion
-    public void MoveToPoint(Vector3 point) => agent.SetDestination(point);
+    
+    private bool IsDead => health <= 0;
+
+    private void MoveToPoint(Vector3 point, float interactionRadius = 0)
+    {
+        _agent.stoppingDistance = interactionRadius - 0.5f;
+        _agent.SetDestination(point);
+    }
+    
+    private void MoveAndLockOnto(Interactable followingTarget)
+    {
+        this.followingTarget = followingTarget;
+        _agent.stoppingDistance = followingTarget.interactionType.selectionRadius - 0.5f;
+        _agent.SetDestination(this.followingTarget.transform.position);
+    }
 
     public void AddOrder(Order order)
     {
-        orders.AddLast(order);
+        if (IsDead)
+        {
+            Debug.Log("Can't add order since " + playerName + " is dead.");
+            return;
+        }
+        if(order.linkedOrder == null) _orders.Clear();
+        _orders.AddFirst(order);
+        currentOrder = _orders.First();
         Debug.Log("Order " + order.orderName + " added to " + gameObject.name);
+        StartOrder(currentOrder);
     }
     
     public void StopOrders()
     {
-        orders.Clear();
-        agent.SetDestination(transform.position);
+        _orders.Clear();
+        currentOrder.isEmptyOrDone = true;
+        _agent.SetDestination(transform.position);
         Debug.Log("All orders stopped");
     }
 
@@ -75,13 +116,20 @@ public class PlayerMotor : MonoBehaviour
                                  gameObject,
                                  target.position,
                                  target.gameObject);
+            else
+                return new Order("Follow " + target.name,
+                    Order.OrderType.FOLLOW,
+                    gameObject,
+                    target.position,
+                    target.gameObject, interactableSettings.interactionType.selectionRadius);
                                  
-        if(target.GetComponent<Item>())
-            return new Order("Harvest " + target.name,
-                             Order.OrderType.HARVEST,
-                             gameObject,
-                             target.position,
-                             target.gameObject);
+        if(target.GetComponent<Interactable>())
+            if(target.GetComponent<Interactable>().itemType)
+                return new Order("Harvest " + target.name,
+                    Order.OrderType.HARVEST,
+                    gameObject,
+                    target.position,
+                    target.gameObject);
 
         return new Order("Move towards " + position,
                          Order.OrderType.MOVE,
@@ -90,22 +138,26 @@ public class PlayerMotor : MonoBehaviour
     }
     
     public void StartOrder(Order order){
-        Debug.Log("Order " + order.orderName);
+        Debug.Log("Order " + order.orderName + " started.");
         switch (order.orderType)
         {
             case Order.OrderType.MOVE:
-                order.emissor.GetComponent<PlayerMotor>().agent.SetDestination(order.receiverPosition);
+                order.transmitter.GetComponent<PlayerMotor>().MoveToPoint(order.receiverPosition, order.interactionRadius);
                 break;
             
             case Order.OrderType.HARVEST:
-                if(Vector3.Distance(order.emissor.transform.position, order.receiver.transform.position) > order.receiver.GetComponent<Item>().itemType.interactionType.selectionRadius)
+                if(Vector3.Distance(order.transmitter.transform.position, order.receiver.transform.position) > 1f + order.receiver.GetComponent<Interactable>().interactionType.selectionRadius)
                 {
-                    order.emissor.GetComponent<PlayerMotor>().orders.AddFirst(new Order("Move to harvest " + order.receiver, Order.OrderType.MOVE, order.emissor, order.receiver.transform.position, order.receiver, order));
+                    order.transmitter.GetComponent<PlayerMotor>().AddOrder(new Order("Move to harvest " + order.receiver, Order.OrderType.MOVE, order.transmitter, order.receiver.transform.position, order.receiver, order.receiver.GetComponent<Interactable>().interactionType.selectionRadius, order));
+                    Debug.Log("Order " + order.orderName + " waiting for move order to finish....");
+                    return;
                 }
-                order.receiver.GetComponent<Item>().onPickUp(order.emissor.GetComponent<PlayerMotor>());
+                order.receiver.GetComponent<Interactable>().OnPickUp(order.transmitter.GetComponent<PlayerMotor>());
+                break;
+            
+            case Order.OrderType.FOLLOW:
+                order.transmitter.GetComponent<PlayerMotor>().MoveAndLockOnto(order.receiver.GetComponent<Interactable>());
                 break;
         }
-
-        order.emissor.GetComponent<PlayerMotor>().currentOrder = order.emissor.GetComponent<PlayerMotor>().orders.First.Value;
     }
 }
