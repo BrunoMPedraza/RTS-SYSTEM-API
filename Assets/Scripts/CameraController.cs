@@ -25,6 +25,7 @@ public class CameraController : MonoBehaviour
 
     private void Awake()
     {
+        defaultZoom = transform.position.y;
         panPosition = transform.position - offSet;
         offSet.z *= -1;
         keyboardControl = PlayerInputManager.currentKeyHandler.keyboardControlsCamera;
@@ -34,46 +35,39 @@ public class CameraController : MonoBehaviour
     void Update()
     {
         #region zoomLimits
-            
+        //Remember zoom should not be changed on execution
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (rememberZoom && allowZoom)
-        { //IF YES THEN IT WILL REMEMBER THE ACTUAL ZOOM, DOESNT WORK IN EXECUTION
-            if (panPosition.y < minY)
-            panPosition.y = minY;
-            else if (panPosition.y > maxY)
-            panPosition.y = maxY;
-            else
-            panPosition.y -= scroll * scrollSpeed * 1000f * Time.deltaTime;
-        }
-        else if (allowZoom)
-        { //DOESNT WORK IN EXECUTION!!
-            
-            if (offSet.y <  Math.Abs(minY))
-            offSet.y =  Math.Abs(minY);
-            else if (offSet.y > maxY+maxY)
-            offSet.y = maxY+maxY;
-            else
-            offSet.y -= scroll * scrollSpeed * 1000f * Time.deltaTime;
+        if(allowZoom){
+            if (rememberZoom)
+            { 
+                panPosition.y = panPosition.y<minY ? minY :
+                panPosition.y>maxY ? maxY : 
+                panPosition.y-= scroll * scrollSpeed * 1000f * Time.deltaTime;
+            }
+            else // This works, but peraphs we can do better.
+            {
+                offSet.y = offSet.y<Math.Abs(minY) ? Math.Abs(minY) :
+                offSet.y>maxY*2 ? maxY*2 : 
+                offSet.y-= scroll * scrollSpeed * 1000f * Time.deltaTime; 
+                //TODO for some reason it jiggles when you force the wheel. Maybe disable the upward value?
+            }
         }
         #endregion
-
-
         #region cameraHold
+        //This checks "Is camera being held? Then disable non conditional camera behavior"
         if(Input.GetKeyDown(PlayerInputManager.GetKeyCode("camera_lockHold_key"))){
             isLocked = !isLocked;
         }
         if(isLocked){
-            offSet.z = offSet.y/2; // RELATIVE OFFSET BASED UPON ZOOM ON CAMERA
+            offSet.z = offSet.y/2;
             panPosition = lockTarget.position;
             LookAtPosition(lockTarget.position);
-        
-      
-        
+    
             
-        } //ZOOM SHOULD BE INSIDE ISLOCKED
+        } 
         else{
-            #endregion
-
+        #endregion
+        #region updateCamera (Non-conditional)
         panPosition.z += 
         (Input.mousePosition.y >= Screen.height - 
         panBorderThickness ? 1 : Input.mousePosition.y <= 
@@ -90,6 +84,7 @@ public class CameraController : MonoBehaviour
         panPosition.z = Mathf.Clamp(panPosition.z, -panLimit.y, panLimit.y);
         LookAtPosition(panPosition);
         }
+        #endregion
     }
 
     public void LookAtPosition(Vector3 target)
