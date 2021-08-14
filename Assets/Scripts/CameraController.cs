@@ -34,36 +34,30 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
-        #region zoomLimits
+        #region zoomBehavior
         //Remember zoom should not be changed on execution
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if(allowZoom){
-            if (rememberZoom)
-            { 
-                panPosition.y = panPosition.y<minY ? minY :
-                panPosition.y>maxY ? maxY : 
-                panPosition.y-= scroll * scrollSpeed * 1000f * Time.deltaTime;
-            }
-            else // This works, but peraphs we can do better.
-            {
-                offSet.y = offSet.y<Math.Abs(minY) ? Math.Abs(minY) :
-                offSet.y>maxY*2 ? maxY*2 : 
-                offSet.y-= scroll * scrollSpeed * 1000f * Time.deltaTime; 
-                //TODO for some reason it jiggles when you force the wheel. Maybe disable the upward value?
-            }
+            offSet.y = 
+            offSet.y < Math.Abs(minY) ? Math.Abs(minY) :
+            offSet.y > maxY * 2 ? maxY * 2 :
+            (!rememberZoom) ? offSet.y -= scroll * scrollSpeed * 1000f * Time.deltaTime :
+            (!isLocked) ?  offSet.y -= scroll * scrollSpeed * 1000f * Time.deltaTime : defaultZoom;
         }
         #endregion
         #region cameraHold
         //This checks "Is camera being held? Then disable non conditional camera behavior"
-        if(Input.GetKeyDown(PlayerInputManager.GetKeyCode("camera_lockHold_key"))){
+        if(Input.GetKeyDown(PlayerInputManager.GetKeyCode("camera_lockHold_key")))
             isLocked = !isLocked;
-        }
+
+        if(Input.GetKeyDown(PlayerInputManager.GetKeyCode("camera_restoreZoom_key")))
+            RestoreZoomCamera();
+
         if(isLocked){
             offSet.z = offSet.y/2;
+            if(rememberZoom) RestoreZoomCamera();
             panPosition = lockTarget.position;
             LookAtPosition(lockTarget.position);
-    
-            
         } 
         else{
         #endregion
@@ -85,6 +79,7 @@ public class CameraController : MonoBehaviour
         LookAtPosition(panPosition);
         }
         #endregion
+        
     }
 
     public void LookAtPosition(Vector3 target)
@@ -119,6 +114,8 @@ public class CameraController : MonoBehaviour
         }
     }
 
-
+    public void RestoreZoomCamera(){
+        offSet.y = defaultZoom;
+    }
 
 }

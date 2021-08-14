@@ -19,6 +19,8 @@ MonoBehaviour:
     keyCode: 282
   - keyName: camera_lockHold_key
     keyCode: 121
+  - keyName: camera_restoreZoom_key
+    keyCode: 307
   - keyName: order_Stop
     keyCode: 115
   - keyName: order_Attack
