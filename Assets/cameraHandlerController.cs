@@ -4,19 +4,16 @@ using UnityEngine;
 
 public class cameraHandlerController : MonoBehaviour
 {
-    #region Boolean Options
-    [Header("Optional features")]
-    public bool hasArrowMovement = true;
-    public bool hasRotation = true; 
-    public bool hasCameraSpeedUp = true; [Tooltip("By default shift key")]
-    public bool hasZoom = true;
-    public bool hasAnchor = true;
-    public bool hasMouseRotation = true;
-    #endregion
+    [Header("Features")]
+
+    [Tooltip("Follow someone?")]    
     public Transform focusTransform = null;
+    [Tooltip("Main camera")]    
     public Transform cameraTransform;
     private bool _isLocked;
-    [Header("Speed Settings")]    
+    [Header("Movement Settings")]    
+    public bool hasCameraSpeedUp = true; [Tooltip("By default shift key")]
+    public bool hasArrowMovement = true;
     public float cameraMovementSpeed = 1f;
     private float _cameraFastMovementSpeed = 2f;
     [Tooltip("How much does the camera speed up?.")]
@@ -24,30 +21,38 @@ public class cameraHandlerController : MonoBehaviour
     private float _normalSpeed = 1f;
     [Tooltip("How fast the camera freezes after it stops moving?")]
     public float cameraFriction = 8f; 
-    public Vector3 newPosition;
-    public Quaternion newRotation;
+    public bool hasAnchor = true;
+    private Vector3 _newPosition;
+    [Header("Rotation settings")]
+    private Quaternion _newRotation;
+    public bool hasRotation = true; 
     public float rotationAmount;
     [Header("Zoom Settings")]
+    public bool hasZoom = true;
     public bool MouseWheelZoom = true;
     public bool KeyboardZoom = true;
     public float zoomStrength = 5;
+    public float zoomDownLimit = 5f;
+    public float zoomUpLimit = 45f;
     private Vector3 _zoomPower;
     private Vector3 _newZoom;
-
+    private Vector3 _defaultZoom;
     private Vector3 _dragStartPosition;
     private Vector3 _dragCurrentPosition;
     private Vector3 _rotateStartPosition;
     private Vector3 _rotateCurrentPosition;
     [Header("Mouse displacement Settings")]
     public bool hasMouseMovement = true;
-    public float cameraBorderThickness = 6f;
+    public bool hasMouseRotation = true;
+    private float _cameraBorderThickness = 6f;
     void Start()
     {
         _normalSpeed = cameraMovementSpeed;
         _cameraFastMovementSpeed = cameraMovementSpeed * cameraFastMultiplier;
-        newPosition = transform.position;
-        newRotation = transform.rotation;
+        _newPosition = transform.position;
+        _newRotation = transform.rotation;
         _newZoom = cameraTransform.localPosition;
+        _defaultZoom.y = _newZoom.y;
         _zoomPower = new Vector3(0, -zoomStrength/5, zoomStrength/5);
     }
 
@@ -55,33 +60,38 @@ public class cameraHandlerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        HandleInputCanFocus();
         if(focusTransform!=null){
-            transform.position = focusTransform.position;
+            transform.position = Vector3.Lerp(transform.position, _newPosition, Time.deltaTime * cameraFriction);
+            transform.rotation = Quaternion.Lerp(transform.rotation, _newRotation, Time.deltaTime * cameraFriction);
+            cameraTransform.localPosition = Vector3.Lerp(cameraTransform.localPosition, _newZoom, Time.deltaTime * cameraFriction);
+            _newPosition.x = focusTransform.position.x;
+            _newPosition.z = focusTransform.position.z;
         }else{
             HandleInput();
         }
     }
 
-    public void RestoreZoomCamera(){
-        // offSet.y = defaultZoom;
+    void HandleInputCanFocus(){
+        if(hasZoom)HandleCameraZoom();
     }
     void HandleInput()
     {
         //CALLBACK HELL
+        if(hasRotation)HandleRotation();
         if(hasAnchor)HandleAnchorMovement();
-        if(hasZoom)HandleCameraZoom();
         if(hasCameraSpeedUp)HandleFastSpeed();
         if(hasArrowMovement)HandleArrowKeyMovement();
         if(hasMouseMovement)HandleMouseMovement();
-        if(hasRotation)HandleRotation();
 
-        transform.position = Vector3.Lerp(transform.position, newPosition, Time.deltaTime * cameraFriction);
-        transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, Time.deltaTime * cameraFriction);
+        transform.position = Vector3.Lerp(transform.position, _newPosition, Time.deltaTime * cameraFriction);
+        transform.rotation = Quaternion.Lerp(transform.rotation, _newRotation, Time.deltaTime * cameraFriction);
         cameraTransform.localPosition = Vector3.Lerp(cameraTransform.localPosition, _newZoom, Time.deltaTime * cameraFriction);
     }
     void HandleAnchorMovement()
     {
-        if (Input.GetMouseButtonDown(2))
+        //TODO: the cursor should become an anchor and be limited to a small moving, if not it will activate border displacement.
+        if (Input.GetMouseButtonDown(0))
         {
             Plane plane = new Plane(Vector3.up, Vector3.zero);
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -91,7 +101,7 @@ public class cameraHandlerController : MonoBehaviour
                 _dragStartPosition = ray.GetPoint(entry);
             }
         }
-        if (Input.GetMouseButton(2))
+        if (Input.GetMouseButton(0))
         {
             Plane plane = new Plane(Vector3.up, Vector3.zero);
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -99,23 +109,28 @@ public class cameraHandlerController : MonoBehaviour
             if (plane.Raycast(ray, out entry))
             {
                 _dragCurrentPosition = ray.GetPoint(entry);
-                newPosition = transform.position + _dragStartPosition - _dragCurrentPosition;
+                _newPosition = transform.position + _dragStartPosition - _dragCurrentPosition;
             }
         }
 
         if (hasMouseRotation){
-            if(Input.GetMouseButtonDown(1)){
+            if(Input.GetMouseButtonDown(2)){
+                Cursor.lockState = CursorLockMode.Locked;
                 _rotateStartPosition = Input.mousePosition;
             }
-            if(Input.GetMouseButton(1)){
+            if(Input.GetMouseButton(2)){
+                Cursor.lockState = CursorLockMode.Locked;
                 _rotateCurrentPosition = Input.mousePosition;
                 Vector3 difference = _rotateStartPosition - _rotateCurrentPosition;
                 _rotateStartPosition = _rotateCurrentPosition;
-                newRotation *= Quaternion.Euler(Vector3.up * (-difference.x / 5f));
+                _newRotation *= Quaternion.Euler(Vector3.up * (-difference.x / 5f));
             }
         }
     }
     void HandleCameraZoom(){
+        if(Input.GetKeyDown(PlayerInputManager.GetKeyCode("camera_restoreZoom")))
+            _newZoom.y = _defaultZoom.y;
+
         if(KeyboardZoom){
             _newZoom =
             (Input.GetKey(PlayerInputManager.GetKeyCode("camera_zoomIn"))) ? _newZoom + _zoomPower/3f :
@@ -126,7 +141,12 @@ public class cameraHandlerController : MonoBehaviour
             _newZoom =
             (Input.mouseScrollDelta.y != 0) ? _newZoom + (Input.mouseScrollDelta.y * (_zoomPower*2)) : _newZoom;
         }
-        
+
+        _newZoom.y =
+            _newZoom.y < zoomDownLimit ? zoomDownLimit :
+            _newZoom.y > zoomUpLimit ? zoomUpLimit :
+            _newZoom.y;
+        // TODO: Why does this keeps moving after full zoom? Probably the problem is here
     }
 
     void HandleFastSpeed(){
@@ -137,29 +157,31 @@ public class cameraHandlerController : MonoBehaviour
 
     void HandleRotation(){
         if (Input.GetKey(PlayerInputManager.GetKeyCode("camera_rotateRight_key")))
-        newRotation *= Quaternion.Euler(Vector3.up * rotationAmount);
+        _newRotation *= Quaternion.Euler(Vector3.up * rotationAmount);
         if (Input.GetKey(PlayerInputManager.GetKeyCode("camera_rotateLeft_key")))
-        newRotation *= Quaternion.Euler(Vector3.down * rotationAmount);
+        _newRotation *= Quaternion.Euler(Vector3.down * rotationAmount);
     }
     void HandleArrowKeyMovement(){
         if(Input.GetKey(PlayerInputManager.GetKeyCode("camera_moveForward_key")))
-            newPosition += (transform.forward * cameraMovementSpeed);
+            _newPosition += (transform.forward * cameraMovementSpeed);
         if(Input.GetKey(PlayerInputManager.GetKeyCode("camera_moveBack_key")))
-            newPosition -= (transform.forward * cameraMovementSpeed);
+            _newPosition -= (transform.forward * cameraMovementSpeed);
         if(Input.GetKey(PlayerInputManager.GetKeyCode("camera_moveRight_key")))
-            newPosition += (transform.right * cameraMovementSpeed);
+            _newPosition += (transform.right * cameraMovementSpeed);
         if(Input.GetKey(PlayerInputManager.GetKeyCode("camera_moveLeft_key")))
-            newPosition -= (transform.right * cameraMovementSpeed);
+            _newPosition -= (transform.right * cameraMovementSpeed);
     }
 
     void HandleMouseMovement(){
-        if(Input.mousePosition.y>=Screen.height-cameraBorderThickness){
-            newPosition += (transform.forward * cameraMovementSpeed);}
-        if(Input.mousePosition.y<=cameraBorderThickness){
-            newPosition -= (transform.forward * cameraMovementSpeed);}
-        if(Input.mousePosition.x>=Screen.width-cameraBorderThickness){
-            newPosition += (transform.right * cameraMovementSpeed);}
-        if(Input.mousePosition.x<=cameraBorderThickness){
-            newPosition -= (transform.right * cameraMovementSpeed);}
+        if(Input.mousePosition.y>=Screen.height-_cameraBorderThickness){
+            _newPosition += (transform.forward * cameraMovementSpeed);}
+        if(Input.mousePosition.y<=_cameraBorderThickness){
+            _newPosition -= (transform.forward * cameraMovementSpeed);}
+        if(Input.mousePosition.x>=Screen.width-_cameraBorderThickness){
+            _newPosition += (transform.right * cameraMovementSpeed);}
+        if(Input.mousePosition.x<=_cameraBorderThickness){
+            _newPosition -= (transform.right * cameraMovementSpeed);}
     }
+
+    
 }

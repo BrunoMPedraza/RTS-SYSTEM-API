@@ -43,4 +43,6 @@ MonoBehaviour:
     keyCode: 277
   - keyName: camera_zoomOut
     keyCode: 278
+  - keyName: camera_restoreZoom
+    keyCode: 307
   keyboardControlsCamera: 0
