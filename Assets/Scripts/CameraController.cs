@@ -25,10 +25,10 @@ public class CameraController : MonoBehaviour
 
     private void Awake()
     {
-        defaultZoom = transform.position.y;
+        // defaultZoom = transform.position.y;
         panPosition = transform.position - offSet;
-        offSet.z *= -1;
-        keyboardControl = PlayerInputManager.currentKeyHandler.keyboardControlsCamera;
+        // offSet.z *= -1;
+        // keyboardControl = PlayerInputManager.currentKeyHandler.keyboardControlsCamera;
         // panPosition.y = defaultZoom;
     }
 
@@ -36,28 +36,28 @@ public class CameraController : MonoBehaviour
     {
         #region zoomBehavior
         //Remember zoom should not be changed on execution
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        // float scroll = Input.GetAxis("Mouse ScrollWheel");
         if(allowZoom){
-            offSet.y = 
-            offSet.y < Math.Abs(minY) ? Math.Abs(minY) :
-            offSet.y > maxY * 2 ? maxY * 2 :
-            (!rememberZoom) ? offSet.y -= scroll * scrollSpeed * 1000f * Time.deltaTime :
-            (!isLocked) ?  offSet.y -= scroll * scrollSpeed * 1000f * Time.deltaTime : defaultZoom;
-        }
-        #endregion
-        #region cameraHold
-        //This checks "Is camera being held? Then disable non conditional camera behavior"
-        if(Input.GetKeyDown(PlayerInputManager.GetKeyCode("camera_lockHold_key")))
-            isLocked = !isLocked;
+        //     offSet.y = 
+        //     offSet.y < Math.Abs(minY) ? Math.Abs(minY) :
+        //     offSet.y > maxY ? maxY :
+        //     (!rememberZoom) ? offSet.y -= scroll * scrollSpeed * 1000f * Time.deltaTime :
+        //     (!isLocked) ?  offSet.y -= scroll * scrollSpeed * 1000f * Time.deltaTime : defaultZoom;
+        // }
+        // #endregion
+        // #region cameraHold
+        // //This checks "Is camera being held? Then disable non conditional camera behavior"
+        // if(Input.GetKeyDown(PlayerInputManager.GetKeyCode("camera_lockHold_key")))
+        //     isLocked = !isLocked;
 
-        if(Input.GetKeyDown(PlayerInputManager.GetKeyCode("camera_restoreZoom_key")))
-            RestoreZoomCamera();
+        // if(Input.GetKeyDown(PlayerInputManager.GetKeyCode("camera_restoreZoom_key")))
+        //     RestoreZoomCamera();
 
-        if(isLocked){
-            offSet.z = offSet.y/2;
-            if(rememberZoom) RestoreZoomCamera();
-            panPosition = lockTarget.position;
-            LookAtPosition(lockTarget.position);
+        // if(isLocked){
+        //     offSet.z = offSet.y/2;
+        //     if(rememberZoom) RestoreZoomCamera();
+        //     panPosition = lockTarget.position;
+        //     LookAtPosition(lockTarget.position);
         } 
         else{
         #endregion

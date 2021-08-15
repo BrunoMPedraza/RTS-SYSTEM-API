@@ -25,4 +25,22 @@ MonoBehaviour:
     keyCode: 115
   - keyName: order_Attack
     keyCode: 97
+  - keyName: camera_moveRight_key
+    keyCode: 275
+  - keyName: camera_moveLeft_key
+    keyCode: 276
+  - keyName: camera_moveBack_key
+    keyCode: 274
+  - keyName: camera_moveForward_key
+    keyCode: 273
+  - keyName: camera_rotateRight_key
+    keyCode: 280
+  - keyName: camera_rotateLeft_key
+    keyCode: 281
+  - keyName: camera_activateFastSpeed
+    keyCode: 304
+  - keyName: camera_zoomIn
+    keyCode: 277
+  - keyName: camera_zoomOut
+    keyCode: 278
   keyboardControlsCamera: 0
