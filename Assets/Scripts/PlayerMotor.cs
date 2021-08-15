@@ -59,7 +59,6 @@ public class PlayerMotor : MonoBehaviour
                 }
 
                 currentOrder.isEmptyOrDone = true;
-                followingTarget = null;
                 _orders.RemoveFirst();
             }
 
@@ -72,7 +71,7 @@ public class PlayerMotor : MonoBehaviour
     
     private bool IsDead => health <= 0;
 
-    private void MoveToPoint(Vector3 point, float interactionRadius = 0)
+    private void MoveToPoint(Vector3 point, float interactionRadius = 0.5f)
     {
         _agent.stoppingDistance = interactionRadius - 0.5f;
         _agent.SetDestination(point);
@@ -80,7 +79,6 @@ public class PlayerMotor : MonoBehaviour
     
     private void MoveAndLockOnto(Interactable followingTarget)
     {
-        this.followingTarget = followingTarget;
         _agent.stoppingDistance = followingTarget.interactionType.selectionRadius - 0.5f;
         _agent.SetDestination(this.followingTarget.transform.position);
     }
@@ -95,6 +93,7 @@ public class PlayerMotor : MonoBehaviour
         if(order.linkedOrder == null) _orders.Clear();
         _orders.AddFirst(order);
         currentOrder = _orders.First();
+        followingTarget = null;
         Debug.Log("Order " + order.orderName + " added to " + gameObject.name);
         StartOrder(currentOrder);
     }
@@ -103,6 +102,7 @@ public class PlayerMotor : MonoBehaviour
     {
         _orders.Clear();
         currentOrder.isEmptyOrDone = true;
+        followingTarget = null;
         _agent.SetDestination(transform.position);
         Debug.Log("All orders stopped");
     }
@@ -156,6 +156,8 @@ public class PlayerMotor : MonoBehaviour
                 break;
             
             case Order.OrderType.FOLLOW:
+                order.transmitter.GetComponent<PlayerMotor>().followingTarget =
+                    order.receiver.GetComponent<Interactable>();
                 order.transmitter.GetComponent<PlayerMotor>().MoveAndLockOnto(order.receiver.GetComponent<Interactable>());
                 break;
         }
