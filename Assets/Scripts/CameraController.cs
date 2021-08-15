@@ -72,15 +72,29 @@ public class CameraController : MonoBehaviour
         panBorderThickness ? 1 : Input.mousePosition.x <= 
         panBorderThickness ? -1 : 0 + (keyboardControl ? Input.GetAxisRaw("Horizontal") : 0) * panSpeed * Time.deltaTime);
 
+        //panPosition.y = CalculateVerticalPosition(panPosition, LayerMask.GetMask("Ground"));
  
         panPosition.x = Mathf.Clamp(panPosition.x, -panLimit.x, panLimit.x);
-        panPosition.y = Mathf.Clamp(panPosition.y, minY, maxY);
         panPosition.z = Mathf.Clamp(panPosition.z, -panLimit.y, panLimit.y);
         LookAtPosition(panPosition);
         }
         #endregion
         
     }
+
+    /*public float CalculateVerticalPosition(Vector3 xzPosition, LayerMask layerMask)
+    {
+
+        Ray ray = new Ray(xzPosition + (Vector3.up * 10), Vector3.down);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, layerMask.value))
+        {
+            return (int)hit.point.y;
+        }
+        return 0;
+    }
+    */
 
     public void LookAtPosition(Vector3 target)
     {
