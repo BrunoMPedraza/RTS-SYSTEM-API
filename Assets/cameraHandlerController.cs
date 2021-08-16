@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class cameraHandlerController : MonoBehaviour
@@ -37,12 +35,17 @@ public class cameraHandlerController : MonoBehaviour
     private Vector3 _zoomPower;
     private Vector3 _newZoom;
     private Vector3 _defaultZoom;
+    #region Anchor
+    private float _mouseLimitX;
+    private float _mouseLimitY;
     private Vector3 _dragStartPosition;
     private Vector3 _dragCurrentPosition;
+    #endregion
     private Vector3 _rotateStartPosition;
     private Vector3 _rotateCurrentPosition;
     [Header("Mouse displacement Settings")]
     public bool hasMouseMovement = true;
+    private bool _temporaryMouseDisplacementDisabled = false;
     public bool hasMouseRotation = true;
     private float _cameraBorderThickness = 6f;
     void Start()
@@ -94,7 +97,7 @@ public class cameraHandlerController : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             Plane plane = new Plane(Vector3.up, Vector3.zero);
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition); //Unoptimized
             float entry;
             if (plane.Raycast(ray, out entry))
             {
@@ -115,21 +118,29 @@ public class cameraHandlerController : MonoBehaviour
 
         if (hasMouseRotation){
             if(Input.GetMouseButtonDown(2)){
-                Cursor.lockState = CursorLockMode.Locked;
+                _temporaryMouseDisplacementDisabled = true;
                 _rotateStartPosition = Input.mousePosition;
             }
             if(Input.GetMouseButton(2)){
-                Cursor.lockState = CursorLockMode.Locked;
                 _rotateCurrentPosition = Input.mousePosition;
                 Vector3 difference = _rotateStartPosition - _rotateCurrentPosition;
                 _rotateStartPosition = _rotateCurrentPosition;
                 _newRotation *= Quaternion.Euler(Vector3.up * (-difference.x / 5f));
             }
+            if (Input.GetMouseButtonUp(2))
+            {
+                Cursor.visible = true;
+                _temporaryMouseDisplacementDisabled = false;
+            }
         }
     }
+
     void HandleCameraZoom(){
-        if(Input.GetKeyDown(PlayerInputManager.GetKeyCode("camera_restoreZoom")))
+        if (Input.GetKeyDown(PlayerInputManager.GetKeyCode("camera_restoreZoom")))
+        {
             _newZoom.y = _defaultZoom.y;
+            Cursor.lockState = CursorLockMode.Confined;
+        }
 
         if(KeyboardZoom){
             _newZoom =
@@ -173,6 +184,7 @@ public class cameraHandlerController : MonoBehaviour
     }
 
     void HandleMouseMovement(){
+        if(!_temporaryMouseDisplacementDisabled){
         if(Input.mousePosition.y>=Screen.height-_cameraBorderThickness){
             _newPosition += (transform.forward * cameraMovementSpeed);}
         if(Input.mousePosition.y<=_cameraBorderThickness){
@@ -181,6 +193,7 @@ public class cameraHandlerController : MonoBehaviour
             _newPosition += (transform.right * cameraMovementSpeed);}
         if(Input.mousePosition.x<=_cameraBorderThickness){
             _newPosition -= (transform.right * cameraMovementSpeed);}
+        }
     }
 
     
