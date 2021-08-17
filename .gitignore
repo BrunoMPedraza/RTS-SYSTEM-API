@@ -43,3 +43,6 @@ Thumbs.db
 *.meta
 *.asset
 *.txt
+Logs/shadercompiler-UnityShaderCompiler.exe0.log
+*.json
+*.log
