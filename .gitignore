@@ -46,3 +46,4 @@ Thumbs.db
 Logs/shadercompiler-UnityShaderCompiler.exe0.log
 *.json
 *.log
+**/*.log
