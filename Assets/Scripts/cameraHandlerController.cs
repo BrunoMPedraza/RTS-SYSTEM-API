@@ -63,6 +63,7 @@ public class cameraHandlerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Cursor.lockState = CursorLockMode.Confined; // MUST REMOVE LATER
         HandleInputCanFocus();
         if(focusTransform!=null){
             transform.position = Vector3.Lerp(transform.position, _newPosition, Time.deltaTime * cameraFriction);

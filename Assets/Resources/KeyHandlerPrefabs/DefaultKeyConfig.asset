@@ -45,4 +45,6 @@ MonoBehaviour:
     keyCode: 278
   - keyName: camera_restoreZoom
     keyCode: 307
+  - keyName: console_switchConsole
+    keyCode: 285
   keyboardControlsCamera: 0
